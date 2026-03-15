@@ -1,10 +1,16 @@
 [package]
 authors = ["Florian Ferrier"]
-edition = "2018"
-name = "hello-world"
+edition = "2021"
+name = "blinky"
 version = "0.1.0"
 
 [dependencies]
-cortex-m-rt = "0.7.5"
-cortex-m-semihosting = "0.5.0"
-panic-halt = "1.0.0"
+embedded-hal = "1.0"
+nb = "1"
+cortex-m = "0.7"
+cortex-m-rt = "0.7"
+panic-halt = "1.0"
+
+[dependencies.stm32f4xx-hal]
+version = "0.23.0"
+features = ["stm32f446"]

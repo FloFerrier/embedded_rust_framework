@@ -2,17 +2,24 @@
 #![no_std]
 
 use panic_halt as _;
-
 use cortex_m_rt::entry;
-use cortex_m_semihosting::{debug, hprintln};
+use stm32f4xx_hal::{pac, rcc, prelude::*};
 
 #[entry]
 fn main() -> ! {
-    hprintln!("Hello, world!");
+    let dp = pac::Peripherals::take().unwrap();
+    let cp = cortex_m::Peripherals::take().unwrap();
 
-    // exit QEMU
-    // NOTE do not run this on hardware; it can corrupt OpenOCD state
-    debug::exit(debug::EXIT_SUCCESS);
+    let mut rcc = dp.RCC.freeze(rcc::Config::hsi().sysclk(48.MHz()));
 
-    loop {}
+    let gpioa = dp.GPIOA.split(&mut rcc);
+
+    let mut led = gpioa.pa5.into_push_pull_output();
+
+    let mut delay = cp.SYST.delay(&rcc.clocks);
+
+    loop {
+        led.toggle();
+        delay.delay_ms(1000u32);
+    }
 }

@@ -9,13 +9,13 @@ To do
 
 ## Set Up
 ```shell
-$ cargo install probe-run
+$ curl -LsSf https://github.com/probe-rs/probe-rs/releases/latest/download/probe-rs-tools-installer.sh | sh
 ```
 ```shell
 $ rustup component add llvm-tools
 ```
 ```shell
-$ rustup target add thumbv7m-none-eabi
+$ rustup target add thumbv7em-none-eabihf
 ```
 
 ## Build
@@ -30,5 +30,13 @@ $ cargo clean
 
 ## Run
 ```shell
+$ probe-rs list
+```
+
+```shell
 $ cargo run
+```
+
+```shell
+$ cargo debug
 ```
