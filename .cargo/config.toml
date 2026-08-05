@@ -2,8 +2,8 @@
 rustflags = [
     "-C", "link-arg=-Tlink.x",
 ]
-target = "thumbv7m-none-eabi"
+target = "thumbv7em-none-eabihf"
 
-[target.thumbv7m-none-eabi]
-runner = "qemu-system-arm -cpu cortex-m3 -machine stm32vldiscovery -nographic -semihosting-config enable=on,target=native -kernel"
-#runner = "probe-rs run --chip STM32F100RBT6"
+[target.thumbv7em-none-eabihf]
+
+runner = "probe-rs run --chip nRF52833_xxAA"
