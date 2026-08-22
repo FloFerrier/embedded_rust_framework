@@ -1,10 +1,25 @@
 [package]
 authors = ["Florian Ferrier"]
-edition = "2018"
+edition = "2021"
 name = "hello-world"
 version = "0.1.0"
 
 [dependencies]
 cortex-m-rt = "0.7.5"
-cortex-m-semihosting = "0.5.0"
-panic-halt = "1.0.0"
+defmt = "0.3"
+defmt-rtt = "0.4"
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+embassy-executor = { version = "0.7.0", features = ["arch-cortex-m", "executor-thread", "defmt"] }
+embassy-time = { version = "0.4.0", features = ["defmt", "defmt-timestamp-uptime"] }
+embassy-nrf = { version = "0.3.0", features = ["nrf52833", "gpiote", "time-driver-rtc1", "defmt"] }
+nrf-softdevice = { version = "0.1.0", features = [
+    "nrf52833",
+    "s140",
+    "ble-peripheral",
+    "critical-section-impl",
+    "defmt",
+] }
+nrf-softdevice-s140 = "0.1.1"
+
+[profile.release]
+debug = true
