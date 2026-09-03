@@ -12,13 +12,6 @@ use nrf_softdevice::ble::advertisement_builder::{
 use nrf_softdevice::ble::peripheral::{self, AdvertiseError, NonconnectableAdvertisement};
 use nrf_softdevice::{raw, Softdevice};
 
-/// Trame de données simulée (base) — les 4 premiers octets sont remplacés
-/// par un compteur de séquence 32 bits (little-endian) à chaque cycle.
-static FRAME_TEMPLATE: [u8; 12] =
-    [0xDE, 0xAD, 0xBE, 0xEF, 0xC0, 0xFF, 0xEE, 0x42, 0x13, 0x37, 0x55, 0xAA];
-
-const COMPANY_ID: u16 = 0x0059; // Nordic Semiconductor ASA
-
 #[embassy_executor::task]
 async fn softdevice_task(sd: &'static Softdevice) -> ! {
     sd.run().await
@@ -54,25 +47,22 @@ async fn main(spawner: Spawner) {
         .build();
 
     info!("advertising MB2-POC");
-    let mut seq: u32 = 0;
     loop {
         let mut adv_config = peripheral::Config::default();
         adv_config.timeout = Some(100); // ~1 s par cycle de diffusion
 
-        // Company ID (little-endian) + trame : compteur u32 puis base statique
-        let mut mfg = [0u8; 2 + FRAME_TEMPLATE.len()];
-        mfg[0] = COMPANY_ID as u8;
-        mfg[1] = (COMPANY_ID >> 8) as u8;
-        mfg[2..6].copy_from_slice(&seq.to_le_bytes());
-        mfg[6..].copy_from_slice(&FRAME_TEMPLATE[4..]);
+        let bthome_payload = [
+            0xD2, 0xFC,        // BTHome UUID 0xFCD2 (little-endian)
+            0x40,              // Device Info: version 2, non-encrypted, regular interval
+            0x02, 0xC4, 0x09,  // Temperature: 25.00 °C (sint16, factor 0.01)
+            0x03, 0xBF, 0x13,  // Humidity: 50.55 % (uint16, factor 0.01)
+        ];
 
-        // Payload legacy reconstruit à chaque cycle (max 31 o) :
-        // flags(3) + mfg data(2+2+12=16) = 19 o
         let adv_data = LegacyAdvertisementBuilder::new()
             .flags(&[Flag::GeneralDiscovery, Flag::LE_Only])
-            .raw(AdvertisementDataType::MANUFACTURER_SPECIFIC_DATA, &mfg)
+            .full_name("DIY-sensor")
+            .raw(AdvertisementDataType::SERVICE_DATA_16, &bthome_payload)
             .build();
-        seq = seq.wrapping_add(1);
 
         match peripheral::advertise(
             sd,
